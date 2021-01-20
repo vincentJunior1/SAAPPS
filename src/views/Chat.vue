@@ -1,7 +1,7 @@
 <template>
   <b-container class="bv-example-row">
     <b-form-group>
-      <b-form-select class="mb-3">
+      <b-form-select class="mb-3" v-model="room" @change="selectRoom">
         <b-form-select-option :value="null"
           >Please select Room</b-form-select-option
         >
@@ -25,19 +25,117 @@
         <div class="chat">
           <div class="chat-window">
             <div class="output">
-              <p>
-                <strong>Bagus :</strong>
-                Hai
+              <p v-if="typing.isTyping !== false">
+                <em>{{ typing.user_name }} Is Typing...</em>
+              </p>
+              <p v-for="(item, index) in messages" :key="index">
+                <strong>{{ item.user_name }} :</strong>
+                {{ item.message }}
               </p>
             </div>
           </div>
-          <input class="message" type="text" placeholder="Message" />
-          <button class="send">Send</button>
+          <input
+            class="message"
+            type="text"
+            v-model="message"
+            placeholder="Message"
+          />
+          <button class="send" @click="sendMessage">Send</button>
+          <p>{{ messages }}</p>
         </div>
       </b-col>
     </b-row>
   </b-container>
 </template>
+<script>
+import io from 'socket.io-client'
+export default {
+  name: 'Chat',
+  watch: {
+    message(value) {
+      value
+        ? this.socket.emit('typing', {
+            user_name: this.user_name,
+            room: this.room,
+            isTyping: true
+          })
+        : this.socket.emit('typing', {
+            user_name: this.user_name,
+            room: this.room,
+            isTyping: false
+          })
+    }
+  },
+  data() {
+    return {
+      socket: io('http://localhost:3000'),
+      room: '',
+      user_name: '',
+      message: '',
+      oldRoom: '',
+      messages: [],
+      typing: {
+        isTyping: false
+      }
+    }
+  },
+  created() {
+    if (!this.$route.params.user_name) {
+      this.$router.push('/')
+    }
+    this.user_name = this.$route.params.user_name
+    // console.log(this.$route.params)
+    this.socket.on('chatMessage', data => {
+      this.messages.push(data)
+    })
+    this.socket.on('typingMessage', data => {
+      console.log(data)
+      this.typing = data
+    })
+  },
+  methods: {
+    sendMessage() {
+      // const setData = {
+      //   user_name: this.user_name,
+      //   message: this.message
+      // }
+      // console.log(setData)
+      // this.socket.emit('globalMessage', setData)
+      // this.socket.emit('privateMessage', setData)
+      // this.socket.emit('broadcastMessage', setData)
+      const setData = {
+        user_name: this.user_name,
+        message: this.message,
+        room: this.room
+      }
+      this.socket.emit('roomMessage', setData)
+      this.message = ''
+    },
+    selectRoom(data) {
+      console.log(data)
+      if (this.oldRoom) {
+        // console.log('sudah pernah masuk ke room ' + this.oldRoom)
+        // console.log('dan akan masuk ke room ' + data)
+        // this.oldRoom = data
+        this.socket.emit('changeRoom', {
+          user_name: this.user_name,
+          room: data,
+          oldRoom: this.oldRoom
+        })
+      } else {
+        console.log('belum pernah masuk ke room ' + this.oldRoom)
+        console.log('dan akan masuk ke room ' + data)
+        this.oldRoom = data
+      }
+      this.socket.emit('joinRoom', {
+        user_name: this.user_name,
+        room: data
+      })
+      this.oldRoom = data
+    }
+  }
+}
+</script>
 
 <style scoped>
 .chat {
