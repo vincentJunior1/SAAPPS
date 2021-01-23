@@ -1,12 +1,23 @@
 <template>
-  <b-container class="bv-example-row">
-    hello
-  </b-container>
+  <div class="chat-page">
+    <b-row>
+      <b-col sm="3">
+        <FriendList />
+      </b-col>
+      <b-col sm="9">
+        Helo this is chat
+      </b-col>
+    </b-row>
+  </div>
 </template>
 <script>
+import FriendList from '../components/chat/FriendList'
 // import io from 'socket.io-client'
 export default {
-  name: 'Chat'
+  name: 'Chat',
+  components: {
+    FriendList
+  }
 }
 </script>
 
