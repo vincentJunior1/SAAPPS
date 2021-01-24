@@ -13,7 +13,8 @@ const routes = [
   {
     path: '/',
     name: 'Login',
-    component: Login
+    component: Login,
+    meta: { requiresVisitor: true }
   },
   {
     path: '/maps',
@@ -30,7 +31,8 @@ const routes = [
   {
     path: '/register',
     name: 'Register',
-    component: Register
+    component: Register,
+    meta: { requiresVisitor: true }
   },
   {
     path: '/verification/:id',
@@ -50,6 +52,14 @@ router.beforeEach((to, from, next) => {
     if (!store.getters.isLogin) {
       next({
         path: '/'
+      })
+    } else {
+      next()
+    }
+  } else if (to.matched.some(record => record.meta.requiresVisitor)) {
+    if (store.getters.isLogin) {
+      next({
+        path: '/chat'
       })
     } else {
       next()

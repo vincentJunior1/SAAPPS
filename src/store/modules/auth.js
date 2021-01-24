@@ -53,6 +53,19 @@ export default {
           })
       })
     },
+    editProfiles(_context, payload) {
+      // resolve, reject
+      return new Promise(() => {
+        axios
+          .patch(`${process.env.VUE_APP_URL}user/editprofile/`, payload)
+          .then(result => {
+            console.log(result)
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      })
+    },
     interceptorRequest(context) {
       console.log('interceptor request works!')
       axios.interceptors.request.use(

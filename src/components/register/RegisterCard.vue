@@ -69,7 +69,8 @@ export default {
         user_name: '',
         user_email: '',
         user_password: '',
-        user_phone: 0
+        user_phone: 0,
+        user_bio: 'Default'
       }
     }
   },

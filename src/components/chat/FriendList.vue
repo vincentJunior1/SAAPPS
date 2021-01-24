@@ -1,8 +1,8 @@
 <template>
   <div class="friend-list">
     <div class="navbar" style="position:relative;">
-      <span><p class="nav-title">SAAPS</p></span>
-      <span class="nav-icon" @click="showLists()"
+      <span><p class="nav-title" @click="showLists()">SAAPS</p></span>
+      <span class="nav-icon" @click="trigerSubMenu()"
         ><div class="bar1"></div>
         <div class="bar2" @click="showLists"></div>
         <div class="bar3" @click="showLists"></div
@@ -13,6 +13,13 @@
         <i class="icon-menu fa fa-bullhorn"></i>
         <i class="close" @click="closeList">X</i>
       </div>
+      <div class="submenu" v-if="showSubMenu == 1">
+        <p class="sub-menu" @click="changeChatMode('profile')">Settings</p>
+        <p class="sub-menu" @click="showAllFriend">Contacts</p>
+        <p class="sub-menu">Invite Friends</p>
+        <p class="sub-menu">Telegram FAQ</p>
+        <p class="close-sub-menu" @click="closeSubMenu">X</p>
+      </div>
       <div class="search" style="position:relative;">
         <input
           class="search-navbar"
@@ -20,11 +27,6 @@
           placeholder="Type Your Message Here"
         /><i class="fa fa-plus" aria-hidden="true"></i>
       </div>
-    </div>
-    <div class="friend-chat">
-      <span><b-button class="select-type">All</b-button></span>
-      <span><b-button class="select-type">Important</b-button></span>
-      <span><b-button class="select-type">Unread </b-button></span>
     </div>
     <div class="list-chat">
       <div class="room-chat" style="position:relative;">
@@ -61,21 +63,36 @@
   </div>
 </template>
 <script>
+import { mapMutations } from 'vuex'
 export default {
   name: 'FriendList',
   data() {
     return {
       isChange: false,
-      showList: 0
+      showList: 0,
+      showSubMenu: 0
     }
   },
   methods: {
+    ...mapMutations(['setChatMode']),
     closeList() {
       this.showList = 0
     },
     showLists() {
       console.log('oke')
       this.showList = 1
+    },
+    trigerSubMenu() {
+      this.showSubMenu = 1
+    },
+    closeSubMenu() {
+      this.showSubMenu = 0
+    },
+    changeChatMode() {
+      this.setChatMode('profile')
+    },
+    showAllFriend() {
+      console.log('Show All Friend')
     }
   }
 }
@@ -83,13 +100,13 @@ export default {
 <style scoped>
 .friend-list {
   font-family: Rubik;
-  height: 1024px;
   border-right: 1px solid black;
 }
 .navbar {
   border-bottom: 1px solid black;
 }
 .nav-title {
+  cursor: pointer;
   margin-top: 23px;
   font-size: 32px;
   font-weight: 600;
@@ -116,6 +133,7 @@ export default {
 }
 .search {
   margin-top: 40px;
+  /* margin-left: -40px; */
 }
 .search-navbar {
   width: 100%;
@@ -126,7 +144,8 @@ export default {
   border: none;
   font-size: 14px;
   background-color: #ededed;
-  padding-right: 5%;
+  margin-right: 20px;
+  /* padding-right: 70px; */
   /* margin-left: -30px; */
 }
 .fa-plus {
@@ -134,6 +153,7 @@ export default {
   font-size: 32px;
   position: absolute;
   top: 5px;
+  right: -20px;
   color: #7e98df;
   font-weight: 300;
   right: -65px;
@@ -160,18 +180,35 @@ export default {
   position: absolute;
   top: 23px;
   height: 50px;
+  left: 0px;
   width: 70%;
   text-align: left;
   border-radius: 30px;
   padding-left: 20px;
   color: white;
   background-color: #7e98df;
-  border: 1px solid black;
   font-size: 38px;
   padding-top: 5px;
   padding-right: 15px;
   display: flex;
   justify-content: space-between;
+}
+.submenu {
+  position: absolute;
+  top: 70px;
+  right: 50px;
+  z-index: 1;
+  width: 180px;
+  padding-left: 3%;
+  padding-bottom: 1%;
+  padding-top: 3%;
+  text-align: left;
+  background-color: #7e98df;
+  color: white;
+  border-radius: 15px 0px 15px 15px;
+}
+.sub-menu {
+  cursor: pointer;
 }
 .close {
   cursor: pointer;
@@ -179,9 +216,10 @@ export default {
   position: absolute;
   top: 0px;
   right: 0px;
-  background-color: white;
 }
 .list-chat {
+  height: 460px;
+  overflow-y: scroll;
 }
 .room-chat {
   padding-top: 8px;
@@ -230,5 +268,12 @@ export default {
   background-color: #7e98df;
   color: white;
 }
-/* dropdown */
+.close-sub-menu {
+  position: absolute;
+  top: 0px;
+  right: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* scroll*/
 </style>
