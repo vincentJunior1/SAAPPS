@@ -66,6 +66,31 @@ export default {
           })
       })
     },
+    searchUser(_context, payload) {
+      return new Promise((resolve, reject) => {
+        console.log(payload)
+        axios
+          .post(`${process.env.VUE_APP_URL}user/finduser`, payload)
+          .then(result => {
+            resolve(result.data.data)
+          })
+          .catch(err => {
+            reject(err.msg)
+          })
+      })
+    },
+    addFriends(_context, payload) {
+      return new Promise((resolve, reject) => {
+        axios
+          .post(`${process.env.VUE_APP_URL}user/addfriend/${payload}`)
+          .then(result => {
+            resolve(result)
+          })
+          .catch(err => {
+            reject(err)
+          })
+      })
+    },
     interceptorRequest(context) {
       console.log('interceptor request works!')
       axios.interceptors.request.use(

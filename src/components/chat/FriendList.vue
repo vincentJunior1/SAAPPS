@@ -8,10 +8,46 @@
         <div class="bar3" @click="showLists"></div
       ></span>
       <div class="menu" v-if="showList == 1">
-        <i class="icon-menu fa fa-users"></i>
+        <i class="icon-menu fa fa-users" @click="showSearchFriend"></i>
         <i class="icon-menu fa fa-lock"></i>
         <i class="icon-menu fa fa-bullhorn"></i>
-        <i class="close" @click="closeList">X</i>
+        <i
+          class="close"
+          @click="
+            closeList()
+            showSearchFriend()
+          "
+          >X</i
+        >
+      </div>
+      <div class="search-friends" v-if="searchFriend === 1">
+        <b-form @submit.prevent="addFriend()">
+          <input
+            type="text"
+            class="search-friend"
+            v-model="userEmail"
+            placeholder="Insert Your Friend Email"
+          />
+          <div class="friend-found">
+            <img
+              class="profile-image"
+              style="margin-left:5px;"
+              :src="
+                friend.user_image == ''
+                  ? require('../../assets/image/profile.jpg')
+                  : 'http://localhost:3000/' + friend.user_image
+              "
+              alt=""
+            />
+            <p style="color:white;">{{ friend.user_name }}</p>
+            <b-button
+              @click="addToFriendList"
+              class="add-friend"
+              v-if="showButtonAdd == 1"
+              >Add Friend</b-button
+            >
+          </div>
+        </b-form>
       </div>
       <div class="submenu" v-if="showSubMenu == 1">
         <p class="sub-menu" @click="changeChatMode('profile')">Settings</p>
@@ -63,18 +99,31 @@
   </div>
 </template>
 <script>
-import { mapMutations } from 'vuex'
+import { mapMutations, mapActions } from 'vuex'
+import { alert } from '../../mixins/alert'
 export default {
   name: 'FriendList',
+  mixins: [alert],
   data() {
     return {
       isChange: false,
       showList: 0,
-      showSubMenu: 0
+      showSubMenu: 0,
+      searchFriend: 0,
+      clickSearch: 0,
+      userEmail: '',
+      friend: {},
+      showButtonAdd: 0
     }
+  },
+  created() {
+    this.getChatList()
   },
   methods: {
     ...mapMutations(['setChatMode']),
+    ...mapActions(['getChatList']),
+    ...mapActions(['searchUser']),
+    ...mapActions(['addFriends']),
     closeList() {
       this.showList = 0
     },
@@ -93,6 +142,36 @@ export default {
     },
     showAllFriend() {
       console.log('Show All Friend')
+    },
+    showSearchFriend() {
+      if (this.clickSearch == 0) {
+        this.searchFriend = 1
+        this.clickSearch = 1
+      } else {
+        this.searchFriend = 0
+        this.clickSearch = 0
+      }
+    },
+    addFriend() {
+      const email = { userEmail: this.userEmail }
+      console.log(email)
+      this.searchUser(email)
+        .then(result => {
+          this.friend = result
+          this.showButtonAdd = 1
+        })
+        .catch(err => {
+          this.errorAlert(err)
+        })
+    },
+    addToFriendList() {
+      this.addFriends(this.friend.user_id)
+        .then(result => {
+          this.successAlert(result.data.msg)
+        })
+        .catch(() => {
+          this.errorAlert('User Already Added')
+        })
     }
   }
 }
@@ -104,6 +183,9 @@ export default {
 }
 .navbar {
   border-bottom: 1px solid black;
+}
+.icon-menu {
+  cursor: pointer;
 }
 .nav-title {
   cursor: pointer;
@@ -274,6 +356,33 @@ export default {
   right: 10px;
   font-weight: 700;
   cursor: pointer;
+}
+.search-friends {
+  position: absolute;
+  top: 80px;
+  height: 300px;
+  background-color: white;
+  z-index: 1;
+  padding-top: 30px;
+  background-color: #7e98df;
+  border-radius: 20px;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+.search-friend {
+  height: 40px;
+  border: none;
+  background-color: #ededed;
+  border-radius: 20px;
+  padding-right: 10px;
+  padding-left: 10px;
+  font-size: 14px;
+}
+.search-friend:focus {
+  outline: none;
+}
+.friend-found {
+  margin-top: 30px;
 }
 /* scroll*/
 </style>
