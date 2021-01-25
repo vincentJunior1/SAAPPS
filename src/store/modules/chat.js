@@ -8,7 +8,6 @@ export default {
   mutations: {
     setChatMode(state, payload) {
       state.chatMode = payload
-      console.log(payload)
     }
   },
   actions: {
@@ -21,6 +20,18 @@ export default {
           })
           .catch(err => {
             console.log(err)
+          })
+      })
+    },
+    getFriendList() {
+      return new Promise((resolve, reject) => {
+        axios
+          .get(`${process.env.VUE_APP_URL}chat/getallfriends`)
+          .then(result => {
+            resolve(result)
+          })
+          .catch(err => {
+            reject(new Error(err))
           })
       })
     }

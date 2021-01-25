@@ -51,7 +51,7 @@
       </div>
       <div class="submenu" v-if="showSubMenu == 1">
         <p class="sub-menu" @click="changeChatMode('profile')">Settings</p>
-        <p class="sub-menu" @click="showAllFriend">Contacts</p>
+        <p class="sub-menu" @click="getAllContact">Contacts</p>
         <p class="sub-menu">Invite Friends</p>
         <p class="sub-menu">Telegram FAQ</p>
         <p class="close-sub-menu" @click="closeSubMenu">X</p>
@@ -65,31 +65,25 @@
       </div>
     </div>
     <div class="list-chat">
-      <div class="room-chat" style="position:relative;">
+      <div
+        class="room-chat"
+        style="position:relative;"
+        v-for="(item, index) in friends"
+        :key="index"
+      >
         <span
           ><img
             class="profile-image"
-            src="../../assets/image/profile.jpg"
+            :src="
+              item.user_image == ''
+                ? require('../../assets/image/profile.jpg')
+                : 'http://localhost:3000/' + item.user_image
+            "
             alt=""
           />
         </span>
         <span class="information">
-          <p class="username">Username</p>
-          <p class="message">Usermessagew</p>
-        </span>
-        <p class="time">19:00</p>
-        <p class="notification">2</p>
-      </div>
-      <div class="room-chat" style="position:relative;">
-        <span
-          ><img
-            class="profile-image"
-            src="../../assets/image/profile.jpg"
-            alt=""
-          />
-        </span>
-        <span class="information">
-          <p class="username">Username</p>
+          <p class="username">{{ item.user_name }}</p>
           <p class="message">Usermessagew</p>
         </span>
         <p class="time">19:00</p>
@@ -113,6 +107,7 @@ export default {
       clickSearch: 0,
       userEmail: '',
       friend: {},
+      friends: {},
       showButtonAdd: 0
     }
   },
@@ -124,6 +119,7 @@ export default {
     ...mapActions(['getChatList']),
     ...mapActions(['searchUser']),
     ...mapActions(['addFriends']),
+    ...mapActions(['getFriendList']),
     closeList() {
       this.showList = 0
     },
@@ -139,9 +135,6 @@ export default {
     },
     changeChatMode() {
       this.setChatMode('profile')
-    },
-    showAllFriend() {
-      console.log('Show All Friend')
     },
     showSearchFriend() {
       if (this.clickSearch == 0) {
@@ -171,6 +164,15 @@ export default {
         })
         .catch(() => {
           this.errorAlert('User Already Added')
+        })
+    },
+    getAllContact() {
+      this.getFriendList()
+        .then(result => {
+          this.friends = result.data.data
+        })
+        .catch(err => {
+          console.log(err)
         })
     }
   }
