@@ -12,63 +12,46 @@
             alt=""
         /></span>
         <span class="information">
-          <p class="username">Username</p>
+          <p class="username">{{ profileTo.name }}</p>
           <p class="status" v-if="online == 1">Online</p>
         </span>
       </div>
       <div class="body-room">
-        <span
-          ><img
-            class="image-profiles"
-            src="../../assets/image/profile.jpg"
-            alt=""
-          />
-          <p class="sender">Hello</p></span
-        >
-        <span>
-          <img
-            class="receiver-image"
-            src="../../assets/image/profile.jpg"
-            alt=""
-          />
-          <p class="receiver">Hello juga</p>
-        </span>
-        <span
-          ><img
-            class="image-profiles"
-            src="../../assets/image/profile.jpg"
-            alt=""
-          />
-          <p class="sender">Hello</p></span
-        >
-        <span>
-          <img
-            class="receiver-image"
-            src="../../assets/image/profile.jpg"
-            alt=""
-          />
-          <p class="receiver">Hello juga</p>
-        </span>
-        <span>
-          <img
-            class="receiver-image"
-            src="../../assets/image/profile.jpg"
-            alt=""
-          />
-          <p class="receiver">Hello juga</p>
-        </span>
+        <div class="" v-for="(item, index) in listChatRoom" :key="index">
+          <span v-if="user.user_id == item.user_id_from"
+            ><img
+              class="image-profiles"
+              src="../../assets/image/profile.jpg"
+              alt=""
+            />
+            <p class="sender">
+              {{ item.chat_content }}{{ item.user_id_from }}
+            </p></span
+          >
+          <span v-else>
+            <img
+              class="receiver-image"
+              src="../../assets/image/profile.jpg"
+              alt=""
+            />
+            <p class="receiver">
+              {{ item.chat_content }}{{ item.user_id_from }}
+            </p>
+          </span>
+        </div>
       </div>
     </div>
-    <span class="typing-message">
+    <span class="typing-message" v-if="chat === 1">
       <textarea
         name=""
         class="typing-area"
         rows="2"
+        v-model="chat_content"
         placeholder="type your message here..."
       ></textarea>
       <span class="emot-1" @click="showMenu()">+</span>
       <img class="emot-2" src="../../assets/image/smile.png" alt="" />
-      <i class="emot-3 fa fa-camera"></i>
+      <i class="emot-3 fa fa-camera" @click="sendMessages()"></i>
     </span>
     <div class="menu-chat" v-if="showMenuChat == 1">
       <p class="menuchat">Image</p>
@@ -79,17 +62,38 @@
   </div>
 </template>
 <script>
+import io from 'socket.io-client'
+import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'RoomChat',
   data() {
     return {
-      chat: 1,
       online: 1,
       showMenuChat: 0,
-      clickMenu: 0
+      clickMenu: 0,
+      chat_content: '',
+      allChat: [],
+      socket: io('http://localhost:3000')
     }
   },
+  computed: {
+    ...mapGetters({
+      user: 'setUser',
+      chat: 'getChat',
+      listChatRoom: 'getChatPerRoom',
+      profileTo: 'getProfileTo'
+    })
+  },
+  created() {
+    this.chat
+    this.allChat = this.listChatRoom
+    this.socket.on('chatMessage', data => {
+      this.listChatRoom.push(data)
+    })
+  },
   methods: {
+    ...mapActions(['sendChat']),
+    ...mapActions(['realTimeChat']),
     showMenu() {
       if (this.clickMenu == 0) {
         this.showMenuChat = 1
@@ -98,6 +102,17 @@ export default {
         this.showMenuChat = 0
         this.clickMenu = 0
       }
+    },
+    sendMessages() {
+      const all = {
+        room_chat: this.profileTo.room,
+        user_id_to: this.profileTo.id,
+        chat_content: this.chat_content,
+        user_id_from: this.user.user_id
+      }
+      this.sendChat(all)
+      this.socket.emit('globalMessage', all)
+      this.chat_content = ''
     }
   }
 }
@@ -143,7 +158,7 @@ export default {
   overflow-y: scroll;
   background-color: #fafafa;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
 }
 .receiver {
   text-align: left;

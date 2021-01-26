@@ -11,14 +11,7 @@
         <i class="icon-menu fa fa-users" @click="showSearchFriend"></i>
         <i class="icon-menu fa fa-lock"></i>
         <i class="icon-menu fa fa-bullhorn"></i>
-        <i
-          class="close"
-          @click="
-            closeList()
-            showSearchFriend()
-          "
-          >X</i
-        >
+        <i class="close" @click="closeList()">X</i>
       </div>
       <div class="search-friends" v-if="searchFriend === 1">
         <b-form @submit.prevent="addFriend()">
@@ -61,7 +54,7 @@
           class="search-navbar"
           type="text"
           placeholder="Type Your Message Here"
-        /><i class="fa fa-plus" aria-hidden="true"></i>
+        /><i class="fa fa-plus" aria-hidden="true" @click="showChat()"></i>
       </div>
     </div>
     <div class="list-chat">
@@ -70,6 +63,14 @@
         style="position:relative;"
         v-for="(item, index) in friends"
         :key="index"
+        @click="
+          makeRoomChat(
+            item.user_id,
+            item.room_chat,
+            item.user_image,
+            item.user_name
+          )
+        "
       >
         <span
           ><img
@@ -84,16 +85,17 @@
         </span>
         <span class="information">
           <p class="username">{{ item.user_name }}</p>
-          <p class="message">Usermessagew</p>
+          <p class="message" v-if="listChat == 1">Usermessagew</p>
         </span>
-        <p class="time">19:00</p>
-        <p class="notification">2</p>
+        <p class="time" v-if="listChat == 1">19:00</p>
+        <p class="notification" v-if="listChat == 1">2</p>
       </div>
     </div>
   </div>
 </template>
 <script>
-import { mapMutations, mapActions } from 'vuex'
+import io from 'socket.io-client'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { alert } from '../../mixins/alert'
 export default {
   name: 'FriendList',
@@ -108,11 +110,19 @@ export default {
       userEmail: '',
       friend: {},
       friends: {},
-      showButtonAdd: 0
+      showButtonAdd: 0,
+      listFriend: 0,
+      listChat: 1,
+      socket: io('http://localhost:3000')
     }
   },
+  computed: {
+    ...mapGetters({ chats: 'getChatList' }),
+    ...mapGetters({ user: 'setUser' })
+  },
   created() {
-    this.getChatList()
+    console.log('ini user' + this.user.user_name)
+    this.friends = this.chats
   },
   methods: {
     ...mapMutations(['setChatMode']),
@@ -120,8 +130,17 @@ export default {
     ...mapActions(['searchUser']),
     ...mapActions(['addFriends']),
     ...mapActions(['getFriendList']),
+    ...mapActions(['makeRoomChats']),
+    ...mapActions(['getRoomChat']),
+    ...mapActions(['joinRoom']),
     closeList() {
       this.showList = 0
+      this.searchFriend = 0
+    },
+    showChat() {
+      this.friends = this.chats
+      this.listChat = 1
+      this.listFriend = 0
     },
     showLists() {
       console.log('oke')
@@ -161,6 +180,7 @@ export default {
       this.addFriends(this.friend.user_id)
         .then(result => {
           this.successAlert(result.data.msg)
+          this.getAllContat()
         })
         .catch(() => {
           this.errorAlert('User Already Added')
@@ -170,10 +190,28 @@ export default {
       this.getFriendList()
         .then(result => {
           this.friends = result.data.data
+          this.listFriend = 1
+          this.listChat = 0
         })
         .catch(err => {
           console.log(err)
         })
+    },
+    //  item.user_image, item.user_name
+    makeRoomChat(id, room, image, name) {
+      if (this.listFriend == 1) {
+        this.makeRoomChats(id)
+          .then(result => {
+            console.log(result)
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      } else {
+        const all = { id, room, image, name }
+        this.getRoomChat(all)
+        this.socket.emit('joinRoom', all)
+      }
     }
   }
 }

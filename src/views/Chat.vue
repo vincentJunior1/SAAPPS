@@ -14,7 +14,7 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import FriendList from '../components/chat/FriendList'
 import RoomChat from '../components/chat/RoomChat'
 import Profile from '../components/chat/Profile'
@@ -27,10 +27,16 @@ export default {
     }
   },
   created() {
+    this.getChatList()
+    this.getChatList
     this.chatMode = this.chat
   },
   computed: {
-    ...mapGetters({ chat: 'getChatMode' })
+    ...mapGetters({ chat: 'getChatMode', chatList: 'getChatList' })
+  },
+  methods: {
+    ...mapActions(['getRoomChat']),
+    ...mapActions(['getChatList'])
   },
   components: {
     FriendList,

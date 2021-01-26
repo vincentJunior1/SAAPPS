@@ -12,7 +12,7 @@
           class="user-image"
           :src="
             user.user_image == ''
-              ? '../../assets/image/profile.jpg'
+              ? require('../../assets/image/profile.jpg')
               : 'http://localhost:3000/' + user.user_image
           "
           alt=""
@@ -46,6 +46,22 @@
           </p>
           <p class="bio">Bio</p>
         </div>
+        <div class="location">
+          <GmapMap
+            :center="coordinate"
+            :zoom="10"
+            map-type-id="terrain"
+            style="width: auto; height: 300px"
+          >
+            <GmapMarker
+              :position="coordinate"
+              :clickable="true"
+              :draggable="true"
+              @click="clickMarker"
+              icon="https://img.icons8.com/color/48/000000/map-pin.png"
+            />
+          </GmapMap>
+        </div>
         <div class="user-settings">
           <p class="setting">Setting</p>
           <p class="reset-password">Privacy And Security</p>
@@ -62,8 +78,24 @@ export default {
   name: 'Profile',
   data() {
     return {
-      editPhone: 0
+      editPhone: 0,
+      coordinate: {
+        lat: 10,
+        lng: 10
+      }
     }
+  },
+  created() {
+    this.$getLocation()
+      .then(coordinates => {
+        this.coordinate = {
+          lat: coordinates.lat,
+          lng: coordinates.lng
+        }
+      })
+      .catch(error => {
+        alert(error)
+      })
   },
   computed: {
     ...mapGetters({ user: 'setUser' })
@@ -79,8 +111,19 @@ export default {
       console.log('show')
     },
     saveInput() {
+      console.log(this.user)
       this.editProfiles(this.user)
       this.editPhone = 0
+    },
+    clickMarker(position) {
+      console.log('clicked marker')
+      console.log(position)
+      console.log(position.latLng.lat())
+      console.log(position.latLng.lng())
+      this.coordinate = {
+        lat: position.latLng.lat(),
+        lng: position.latLng.lng()
+      }
     }
   }
 }
