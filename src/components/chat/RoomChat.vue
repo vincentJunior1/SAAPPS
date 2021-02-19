@@ -8,12 +8,21 @@
         <span
           ><img
             class="image-profile"
-            src="../../assets/image/profile.jpg"
+            :src="
+              profileTo.image == '' || profileTo.image == null
+                ? require('../../assets/image/profile.jpg')
+                : path + profileTo.image
+            "
             alt=""
         /></span>
         <span class="information">
           <p class="username">{{ profileTo.name }}</p>
-          <p class="status" v-if="online == 1">Online</p>
+          <p
+            class="status"
+            v-if="isTyping.typing == 1 && isTyping.username !== user.user_name"
+          >
+            Typing
+          </p>
         </span>
       </div>
       <div class="body-room">
@@ -21,22 +30,28 @@
           <span v-if="user.user_id == item.user_id_from"
             ><img
               class="image-profiles"
-              src="../../assets/image/profile.jpg"
+              style="margin-bottom:10px;"
+              :src="
+                item.user_image == '' || item.user_image == null
+                  ? require('../../assets/image/profile.jpg')
+                  : path + item.user_image
+              "
               alt=""
             />
-            <p class="sender">
-              {{ item.chat_content }}
-            </p></span
+            <p class="sender">{{ item.chat_content }}</p></span
           >
           <span v-else>
             <img
               class="receiver-image"
-              src="../../assets/image/profile.jpg"
+              style="margin-bottom:10px;"
+              :src="
+                item.user_image == '' || item.user_image == null
+                  ? require('../../assets/image/profile.jpg')
+                  : path + item.user_image
+              "
               alt=""
             />
-            <p class="receiver">
-              {{ item.chat_content }}
-            </p>
+            <p class="receiver">{{ item.chat_content }}</p>
           </span>
         </div>
       </div>
@@ -64,6 +79,8 @@
 <script>
 import io from 'socket.io-client'
 import { mapGetters, mapActions } from 'vuex'
+import dotenv from 'dotenv'
+dotenv.config()
 export default {
   name: 'RoomChat',
   data() {
@@ -73,7 +90,23 @@ export default {
       clickMenu: 0,
       chat_content: '',
       allChat: [],
+      path: process.env.VUE_APP_URL,
       socket: io('http://localhost:3000')
+    }
+  },
+  watch: {
+    chat_content(value) {
+      value
+        ? this.socket.emit('typing', {
+            username: this.user.user_name,
+            room: this.profileTo.room,
+            typing: 1
+          })
+        : this.socket.emit('typing', {
+            username: this.user.user_name,
+            room: this.profileTo.room,
+            typing: 0
+          })
     }
   },
   computed: {
@@ -81,15 +114,13 @@ export default {
       user: 'setUser',
       chat: 'getChat',
       listChatRoom: 'getChatPerRoom',
-      profileTo: 'getProfileTo'
+      profileTo: 'getProfileTo',
+      isTyping: 'getTyping'
     })
   },
   created() {
     this.chat
     this.allChat = this.listChatRoom
-    this.socket.on('chatMessage', data => {
-      this.listChatRoom.push(data)
-    })
   },
   methods: {
     ...mapActions(['sendChat']),
@@ -108,10 +139,11 @@ export default {
         room_chat: this.profileTo.room,
         user_id_to: this.profileTo.id,
         chat_content: this.chat_content,
-        user_id_from: this.user.user_id
+        user_id_from: this.user.user_id,
+        user_image: this.profileTo.image
       }
       this.sendChat(all)
-      this.socket.emit('globalMessage', all)
+      this.socket.emit('roomMessage', all)
       this.chat_content = ''
     }
   }

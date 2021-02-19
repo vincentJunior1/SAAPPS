@@ -86,7 +86,7 @@
         </span>
         <span class="information">
           <p class="username">{{ item.user_name }}</p>
-          <p class="message">Usermessagew</p>
+          <p class="message">{{ item.chat_content }}</p>
         </span>
         <p class="time">19:00</p>
         <p class="notification">2</p>
@@ -122,11 +122,17 @@ export default {
     ...mapGetters({ user: 'setUser' })
   },
   created() {
-    console.log(this.chats)
     this.friends = this.chats
+    console.log(this.friends)
+    this.socket.on('chatMessage', data => {
+      this.setChat(data)
+    })
+    this.socket.on('typingMessage', data => {
+      this.setTyping(data)
+    })
   },
   methods: {
-    ...mapMutations(['setChatMode']),
+    ...mapMutations(['setChatMode', 'setChat', 'setTyping']),
     ...mapActions([
       'getChatList',
       'joinRoom',

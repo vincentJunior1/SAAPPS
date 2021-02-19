@@ -84,8 +84,8 @@ export default {
           this.successAlert(result.data.msg)
           this.$router.push('/')
         })
-        .catch(() => {
-          this.errorAlert('Email Has Been Registred')
+        .catch(err => {
+          this.errorAlert(err.response.data.msg)
         })
     },
     back() {

@@ -9,7 +9,8 @@ export default {
     chats: {},
     chatPerRoom: {},
     chat: 0,
-    profileTo: {}
+    profileTo: {},
+    isTyping: {}
   },
   mutations: {
     setChatMode(state, payload) {
@@ -24,6 +25,12 @@ export default {
     },
     setProfileTo(state, payload) {
       state.profileTo = payload
+    },
+    setChat(state, payload) {
+      state.chatPerRoom.push(payload)
+    },
+    setTyping(state, payload) {
+      state.isTyping = payload
     }
   },
   actions: {
@@ -79,31 +86,19 @@ export default {
       })
     },
     sendChat(_context, payload) {
-      return new Promise(() => {
+      return new Promise((resolve, reject) => {
         axios
           .post(
             `${process.env.VUE_APP_URL}chat/sendmessage/${payload.room_chat}`,
             payload
           )
           .then(result => {
-            console.log(result)
+            resolve(result)
           })
           .catch(err => {
-            console.log(err)
+            reject(err)
           })
       })
-    },
-    realTimeChat(context, payload) {
-      console.log(payload)
-      context.state.socket.emit('roomMessage', payload)
-    },
-    getRealTime(context) {
-      context.state.socket.on('chatMessage', data => {
-        context.commit.chatPerRoom.push(data)
-      })
-    },
-    joinRoom(context, payload) {
-      context.state.socket.emit('joinRoom', payload)
     }
   },
   getters: {
@@ -121,6 +116,9 @@ export default {
     },
     getProfileTo(state) {
       return state.profileTo
+    },
+    getTyping(state) {
+      return state.isTyping
     }
   }
 }
