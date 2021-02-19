@@ -1,4 +1,5 @@
 import axios from 'axios'
+import router from '../../router'
 import dotenv from 'dotenv'
 dotenv.config()
 export default {
@@ -10,19 +11,23 @@ export default {
     setUser(state, payload) {
       state.user = payload
       state.token = payload.token
+    },
+    delUser(state) {
+      state.user = {}
+      state.token = null
     }
   },
   actions: {
     registerUser(_context, payload) {
       console.log(payload)
-      return new Promise(() => {
+      return new Promise((resolve, reject) => {
         axios
           .post(`${process.env.VUE_APP_URL}user/register/`, payload)
           .then(result => {
-            console.log(result)
+            resolve(result)
           })
           .catch(err => {
-            console.log(err.data.msg)
+            reject(err)
           })
       })
     },
@@ -54,15 +59,14 @@ export default {
       })
     },
     editProfiles(_context, payload) {
-      // resolve, reject
-      return new Promise(() => {
+      return new Promise((resolve, reject) => {
         axios
           .patch(`${process.env.VUE_APP_URL}user/editprofile/`, payload)
           .then(result => {
-            console.log(result)
+            resolve(result)
           })
           .catch(err => {
-            console.log(err)
+            reject(new Error(err))
           })
       })
     },
@@ -90,6 +94,11 @@ export default {
             reject(err)
           })
       })
+    },
+    logout(context) {
+      localStorage.removeItem('token')
+      context.commit('delUser')
+      router.push('/')
     },
     interceptorRequest(context) {
       console.log('interceptor request works!')

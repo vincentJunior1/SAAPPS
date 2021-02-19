@@ -27,16 +27,14 @@ export default {
     }
   },
   created() {
-    this.getChatList()
-    this.getChatList
+    this.getChatLists()
     this.chatMode = this.chat
   },
   computed: {
     ...mapGetters({ chat: 'getChatMode', chatList: 'getChatList' })
   },
   methods: {
-    ...mapActions(['getRoomChat']),
-    ...mapActions(['getChatList'])
+    ...mapActions(['getRoomChat', 'getChatLists'])
   },
   components: {
     FriendList,

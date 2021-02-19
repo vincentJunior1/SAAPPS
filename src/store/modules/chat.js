@@ -27,12 +27,11 @@ export default {
     }
   },
   actions: {
-    getChatList(context) {
+    getChatLists(context) {
       return new Promise((resolve, reject) => {
         axios
           .get(`${process.env.VUE_APP_URL}chat/getallchat/`)
           .then(result => {
-            console.log('udh dateng')
             context.commit('setChatList', result.data.data)
             resolve(result)
           })

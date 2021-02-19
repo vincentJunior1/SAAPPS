@@ -25,7 +25,7 @@
               alt=""
             />
             <p class="sender">
-              {{ item.chat_content }}{{ item.user_id_from }}
+              {{ item.chat_content }}
             </p></span
           >
           <span v-else>
@@ -35,7 +35,7 @@
               alt=""
             />
             <p class="receiver">
-              {{ item.chat_content }}{{ item.user_id_from }}
+              {{ item.chat_content }}
             </p>
           </span>
         </div>

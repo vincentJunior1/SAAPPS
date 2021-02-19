@@ -1,7 +1,7 @@
 <template>
   <div class="register-card">
     <p class="register-title">Register</p>
-    <i class="fa fa-angle-left" style="font-size:38px;"></i>
+    <i class="fa fa-angle-left" style="font-size:38px;" @click="back"></i>
     <p class="greeting">Let's Create Your Account!</p>
     <b-form @submit.prevent="postRegister">
       <b-form-group
@@ -60,9 +60,11 @@
 </template>
 
 <script>
+import { alert } from '../../mixins/alert'
 import { mapActions } from 'vuex'
 export default {
   name: 'RegisterCard',
+  mixins: [alert],
   data() {
     return {
       form: {
@@ -78,7 +80,16 @@ export default {
     ...mapActions(['registerUser']),
     postRegister() {
       this.registerUser(this.form)
-      //   console.log(this.form)
+        .then(result => {
+          this.successAlert(result.data.msg)
+          this.$router.push('/')
+        })
+        .catch(() => {
+          this.errorAlert('Email Has Been Registred')
+        })
+    },
+    back() {
+      this.$router.push('/')
     }
   }
 }
@@ -96,6 +107,7 @@ export default {
   position: relative;
 }
 .fa-angle-left {
+  cursor: pointer;
   position: absolute;
   top: 40px;
   left: 70px;

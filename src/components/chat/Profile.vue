@@ -8,15 +8,20 @@
           @click="goBackToChat()"
         ></i>
         <p class="username">{{ user.user_name }}</p>
-        <img
-          class="user-image"
-          :src="
-            user.user_image == ''
-              ? require('../../assets/image/profile.jpg')
-              : 'http://localhost:3000/' + user.user_image
-          "
-          alt=""
-        />
+        <div class="profile-picture" style="position:relative;">
+          <img
+            class="user-image"
+            id="user-image"
+            :src="
+              user.user_image == ''
+                ? require('../../assets/image/profile.jpg')
+                : 'http://localhost:3000/' + user.user_image
+            "
+            alt=""
+          />
+          <b-button class="change-profile" @click="changeImage">✏️</b-button>
+          <input type="file" @change="uploadImage" id="changeProfile" hidden />
+        </div>
         <p class="fullname">{{ user.user_name }}</p>
         <p class="email">{{ user.user_email }}</p>
         <div class="all-information">
@@ -40,11 +45,12 @@
           <p class="user-username">{{ user.user_name }}</p>
           <p class="username-inf">Username</p>
         </div>
-        <div class="user-description">
+        <div class="user-description" style="position:relative;">
           <p class="description">
             Lorem ipsum dolor sit amet consectetur adipisicing elit.
           </p>
           <p class="bio">Bio</p>
+          <p class="edit-bio">Edit</p>
         </div>
         <div class="location">
           <GmapMap
@@ -63,9 +69,31 @@
           </GmapMap>
         </div>
         <div class="user-settings">
-          <p class="setting">Setting</p>
-          <p class="reset-password">Privacy And Security</p>
+          <p class="setting">
+            Setting
+          </p>
+          <p
+            class="reset-password"
+            @click="$bvModal.show('bv-modal-example')"
+            style="cursor:pointer;"
+          >
+            Change Password
+          </p>
         </div>
+        <b-modal id="bv-modal-example" hide-footer>
+          <template #modal-title>
+            Change Password
+          </template>
+          <div class="d-block text-center">
+            <h3>Hello From This Modal!</h3>
+          </div>
+          <b-button
+            class="mt-3"
+            block
+            @click="$bvModal.hide('bv-modal-example')"
+            >Close Me</b-button
+          >
+        </b-modal>
       </div>
     </div>
   </div>
@@ -73,7 +101,7 @@
 
 <script>
 import { mapMutations, mapGetters, mapActions } from 'vuex'
-
+import { alert } from '../../mixins/alert'
 export default {
   name: 'Profile',
   data() {
@@ -85,12 +113,21 @@ export default {
       }
     }
   },
+  mixins: [alert],
   created() {
+    console.log(this.user)
     this.$getLocation()
       .then(coordinates => {
-        this.coordinate = {
-          lat: coordinates.lat,
-          lng: coordinates.lng
+        if (this.user_lat === 10) {
+          this.coordinate = {
+            lat: coordinates.lat,
+            lng: coordinates.lng
+          }
+        } else {
+          this.coordinate = {
+            lat: this.user.user_lat,
+            lng: this.user.user_lng
+          }
         }
       })
       .catch(error => {
@@ -108,28 +145,74 @@ export default {
     },
     showInput() {
       this.editPhone = 1
-      console.log('show')
     },
     saveInput() {
-      console.log(this.user)
       this.editProfiles(this.user)
       this.editPhone = 0
     },
     clickMarker(position) {
-      console.log('clicked marker')
-      console.log(position)
-      console.log(position.latLng.lat())
-      console.log(position.latLng.lng())
-      this.coordinate = {
+      ;(this.coordinate = {
         lat: position.latLng.lat(),
         lng: position.latLng.lng()
-      }
+      }),
+        (this.user.user_lat = position.latLng.lat())
+      this.user.user_lng = position.latLng.lng()
+      this.editProfiles(this.user)
+        .then(result => {
+          this.successAlert(result.data.msg)
+        })
+        .catch(err => {
+          this.errorAlert(err.data.msg)
+        })
+    },
+    changeImage() {
+      document.getElementById('changeProfile').click()
+      console.log('change picture')
+    },
+    uploadImage(event) {
+      document.getElementById('user-image').src = window.URL.createObjectURL(
+        event.target.files[0]
+      )
+      const image = event.target.files[0]
+      const {
+        user_name,
+        user_phone,
+        user_email,
+        user_lat,
+        user_lng
+      } = this.user
+      const data = new FormData()
+      data.append('user_name', user_name)
+      data.append('user_phone', user_phone)
+      data.append('user_email', user_email)
+      data.append('user_lat', user_lat)
+      data.append('user_lng', user_lng)
+      data.append('user_image', image)
+      this.editProfiles(data)
+        .then(result => {
+          this.user.user_image = result.data.data.user_image
+          this.successAlert(result.data.msg)
+        })
+        .catch(err => {
+          this.errorAlert(err.data.msg)
+        })
     }
   }
 }
 </script>
 
 <style scoped>
+.change-profile {
+  position: absolute;
+  top: -20%;
+  right: 27%;
+  height: 45px;
+  width: 45px;
+  border-radius: 50px;
+  font-size: 16px;
+  background-color: #7e98df;
+  border: none;
+}
 .profile {
   font-family: Rubik;
   overflow-y: scroll;
@@ -155,8 +238,8 @@ export default {
   color: #7e98df;
 }
 .user-image {
-  width: 64px;
-  height: 64px;
+  width: 100px;
+  height: 100px;
   border-radius: 10px;
   border: 1px solid black;
 }
@@ -239,5 +322,16 @@ export default {
 .setting {
   font-size: 16px;
   font-weight: 500;
+}
+.edit-bio {
+  cursor: pointer;
+  position: absolute;
+  top: 0px;
+  right: 10px;
+  font-size: 14px;
+  color: #7e98df;
+}
+.edit-bio:hover {
+  border-bottom: 1px solid #7e98df;
 }
 </style>

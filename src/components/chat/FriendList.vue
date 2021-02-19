@@ -47,6 +47,7 @@
         <p class="sub-menu" @click="getAllContact">Contacts</p>
         <p class="sub-menu">Invite Friends</p>
         <p class="sub-menu">Telegram FAQ</p>
+        <p class="sub-menu" @click="logOut">Log Out</p>
         <p class="close-sub-menu" @click="closeSubMenu">X</p>
       </div>
       <div class="search" style="position:relative;">
@@ -85,10 +86,10 @@
         </span>
         <span class="information">
           <p class="username">{{ item.user_name }}</p>
-          <p class="message" v-if="listChat == 1">Usermessagew</p>
+          <p class="message">Usermessagew</p>
         </span>
-        <p class="time" v-if="listChat == 1">19:00</p>
-        <p class="notification" v-if="listChat == 1">2</p>
+        <p class="time">19:00</p>
+        <p class="notification">2</p>
       </div>
     </div>
   </div>
@@ -121,18 +122,21 @@ export default {
     ...mapGetters({ user: 'setUser' })
   },
   created() {
-    console.log('ini user' + this.user.user_name)
+    console.log(this.chats)
     this.friends = this.chats
   },
   methods: {
     ...mapMutations(['setChatMode']),
-    ...mapActions(['getChatList']),
-    ...mapActions(['searchUser']),
-    ...mapActions(['addFriends']),
-    ...mapActions(['getFriendList']),
-    ...mapActions(['makeRoomChats']),
-    ...mapActions(['getRoomChat']),
-    ...mapActions(['joinRoom']),
+    ...mapActions([
+      'getChatList',
+      'joinRoom',
+      'searchUser',
+      'addFriends',
+      'getFriendList',
+      'makeRoomChats',
+      'getRoomChat',
+      'logout'
+    ]),
     closeList() {
       this.showList = 0
       this.searchFriend = 0
@@ -212,6 +216,9 @@ export default {
         this.getRoomChat(all)
         this.socket.emit('joinRoom', all)
       }
+    },
+    logOut() {
+      this.logout()
     }
   }
 }
