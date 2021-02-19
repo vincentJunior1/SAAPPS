@@ -53,6 +53,7 @@
 </template>
 <script>
 import { mapActions } from 'vuex'
+import { alert } from '../mixins/alert'
 export default {
   name: 'loginCard',
   data() {
@@ -63,6 +64,7 @@ export default {
       }
     }
   },
+  mixins: [alert],
   methods: {
     ...mapActions(['loginUser']),
     onSubmit() {
@@ -71,7 +73,7 @@ export default {
           this.$router.push('/chat')
         })
         .catch(err => {
-          console.log(err)
+          this.errorAlert(err.response.data.msg)
         })
     },
     goToRegister() {

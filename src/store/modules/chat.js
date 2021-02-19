@@ -36,7 +36,7 @@ export default {
             resolve(result)
           })
           .catch(err => {
-            reject(new Error(err))
+            reject(err.response)
           })
       })
     },
@@ -48,7 +48,7 @@ export default {
             resolve(result)
           })
           .catch(err => {
-            reject(new Error(err))
+            reject(err.response)
           })
       })
     },
@@ -60,7 +60,7 @@ export default {
             resolve(result)
           })
           .catch(err => {
-            reject(new Error(err))
+            reject(err.response)
           })
       })
     },
@@ -74,7 +74,7 @@ export default {
             resolve(result)
           })
           .catch(err => {
-            reject(new Error(err))
+            reject(err.response)
           })
       })
     },

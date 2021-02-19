@@ -82,16 +82,38 @@
         </div>
         <b-modal id="bv-modal-example" hide-footer>
           <template #modal-title>
-            Change Password
+            <p class="title-modal">Change Password</p>
           </template>
-          <div class="d-block text-center">
-            <h3>Hello From This Modal!</h3>
+          <div class="d-block text-left">
+            <p class="title-password">Input Your Old Password</p>
+            <input
+              class="change-password"
+              type="password"
+              v-model="oldPassword"
+              placeholder="Old Password"
+            />
+            <p class="title-password">Input Your New Password</p>
+            <input
+              class="change-password"
+              type="password"
+              v-model="newPassword"
+              placeholder="New Password"
+            />
+            <br />
+            <input
+              class="change-password"
+              type="password"
+              v-model="confirmPassword"
+              placeholder="Confirm Your Password"
+            />
           </div>
+          <b-button class="save-password" type="danger" @click="savePassword"
+            >Save</b-button
+          >
           <b-button
-            class="mt-3"
-            block
+            class="cancel-password"
             @click="$bvModal.hide('bv-modal-example')"
-            >Close Me</b-button
+            >Cancel</b-button
           >
         </b-modal>
       </div>
@@ -110,7 +132,10 @@ export default {
       coordinate: {
         lat: 10,
         lng: 10
-      }
+      },
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: ''
     }
   },
   mixins: [alert],
@@ -118,15 +143,15 @@ export default {
     console.log(this.user)
     this.$getLocation()
       .then(coordinates => {
-        if (this.user_lat === 10) {
+        if (this.user_lat == 10) {
           this.coordinate = {
             lat: coordinates.lat,
             lng: coordinates.lng
           }
         } else {
           this.coordinate = {
-            lat: this.user.user_lat,
-            lng: this.user.user_lng
+            lat: parseFloat(this.user.user_lat),
+            lng: parseFloat(this.user.user_lng)
           }
         }
       })
@@ -139,7 +164,7 @@ export default {
   },
   methods: {
     ...mapMutations(['setChatMode']),
-    ...mapActions(['editProfiles']),
+    ...mapActions(['editProfiles', 'changePassword']),
     goBackToChat() {
       this.setChatMode('chat')
     },
@@ -157,6 +182,7 @@ export default {
       }),
         (this.user.user_lat = position.latLng.lat())
       this.user.user_lng = position.latLng.lng()
+      console.log(this.coordinate)
       this.editProfiles(this.user)
         .then(result => {
           this.successAlert(result.data.msg)
@@ -194,8 +220,26 @@ export default {
           this.successAlert(result.data.msg)
         })
         .catch(err => {
+          document.getElementById('user-image').src = this.user.user_image
           this.errorAlert(err.data.msg)
         })
+    },
+    savePassword() {
+      if (this.newPassword !== this.confirmPassword) {
+        this.errorAlert('Your password is not match')
+      } else {
+        const data = {
+          ...{ oldPassword: this.oldPassword, newPassword: this.newPassword }
+        }
+        this.changePassword(data)
+          .then(result => {
+            this.successAlert(result.data.msg)
+          })
+          .catch(err => {
+            console.log(err)
+            this.errorAlert(err.data.msg)
+          })
+      }
     }
   }
 }
@@ -333,5 +377,46 @@ export default {
 }
 .edit-bio:hover {
   border-bottom: 1px solid #7e98df;
+}
+.title-modal {
+  font-size: 22px;
+  font-weight: 700;
+  color: #7e98df;
+  text-align: center;
+}
+.title-password {
+  font-size: 22px;
+  font-weight: 700;
+  color: #7e98df;
+}
+.change-password {
+  margin-top: -10px;
+  border: none;
+  border-bottom: 1px solid black;
+  width: 50%;
+  height: 30px;
+  font-size: 18px;
+  margin-left: 10px;
+  margin-bottom: 20px;
+}
+.change-password:focus {
+  border: none;
+  outline: none;
+  border-bottom: 1px solid black;
+  width: 50%;
+  height: 30px;
+  font-size: 18px;
+}
+.save-password {
+  background-color: #007bff;
+  border: none;
+  float: right;
+  width: 100px;
+  font-weight: 700;
+}
+.cancel-password {
+  background-color: #bd2130;
+  border: none;
+  font-weight: 700;
 }
 </style>

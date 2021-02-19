@@ -39,7 +39,7 @@ export default {
             resolve(result)
           })
           .catch(err => {
-            reject(new Error(err))
+            reject(err.response)
           })
       })
     },
@@ -54,7 +54,7 @@ export default {
             console.log(result)
           })
           .catch(err => {
-            reject(new Error(err))
+            reject(err)
           })
       })
     },
@@ -66,7 +66,19 @@ export default {
             resolve(result)
           })
           .catch(err => {
-            reject(new Error(err))
+            reject(err.response)
+          })
+      })
+    },
+    changePassword(_context, payload) {
+      return new Promise((resolve, reject) => {
+        axios
+          .patch(`${process.env.VUE_APP_URL}user/changepassword/`, payload)
+          .then(result => {
+            resolve(result)
+          })
+          .catch(err => {
+            reject(err.response)
           })
       })
     },
