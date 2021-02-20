@@ -24,6 +24,7 @@
           <div class="friend-found">
             <img
               class="profile-image"
+              v-if="showPicture == 1"
               style="margin-left:5px;"
               :src="
                 friend.user_image == ''
@@ -64,6 +65,11 @@
         style="position:relative;"
         v-for="(item, index) in friends"
         :key="index"
+        v-long-press="500"
+        @long-press-start="
+          onLongPressStart(item.room_chat)
+          $bvModal.show('bv-modal-example')
+        "
         @click="
           makeRoomChat(
             item.user_id,
@@ -92,11 +98,23 @@
         <p class="notification">2</p>
       </div>
     </div>
+    <b-modal id="bv-modal-example" hide-footer>
+      <div class="d-block text-center">
+        <h3>Do You Want delete this chat?</h3>
+      </div>
+      <b-button class="mt-3" variant="danger" block @click="deleteChat"
+        >Delete</b-button
+      >
+      <b-button class="mt-3" block @click="$bvModal.hide('bv-modal-example')"
+        >Cancel</b-button
+      >
+    </b-modal>
   </div>
 </template>
 <script>
 import io from 'socket.io-client'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
+import LongPress from 'vue-directive-long-press'
 import { alert } from '../../mixins/alert'
 export default {
   name: 'FriendList',
@@ -114,14 +132,20 @@ export default {
       showButtonAdd: 0,
       listFriend: 0,
       listChat: 1,
-      socket: io('http://localhost:3000')
+      showPicture: 0,
+      socket: io('http://localhost:3000'),
+      roomNumber: 0
     }
   },
   computed: {
     ...mapGetters({ chats: 'getChatList' }),
     ...mapGetters({ user: 'setUser' })
   },
+  directives: {
+    'long-press': LongPress
+  },
   created() {
+    this.getChatLists()
     this.friends = this.chats
     console.log(this.friends)
     this.socket.on('chatMessage', data => {
@@ -134,14 +158,15 @@ export default {
   methods: {
     ...mapMutations(['setChatMode', 'setChat', 'setTyping']),
     ...mapActions([
-      'getChatList',
+      'getChatLists',
       'joinRoom',
       'searchUser',
       'addFriends',
       'getFriendList',
       'makeRoomChats',
       'getRoomChat',
-      'logout'
+      'logout',
+      'deleteChatUser'
     ]),
     closeList() {
       this.showList = 0
@@ -179,11 +204,12 @@ export default {
       console.log(email)
       this.searchUser(email)
         .then(result => {
+          this.showPicture = 1
           this.friend = result
           this.showButtonAdd = 1
         })
         .catch(err => {
-          this.errorAlert(err)
+          this.errorAlert(err.response.data.msg)
         })
     },
     addToFriendList() {
@@ -222,6 +248,21 @@ export default {
         this.getRoomChat(all)
         this.socket.emit('joinRoom', all)
       }
+    },
+    onLongPressStart(room) {
+      this.roomNumber = room
+    },
+    deleteChat() {
+      this.deleteChatUser(this.roomNumber)
+        .then(result => {
+          this.successAlert(result.data.msg)
+          this.getChatLists()
+          this.roomNumber = 0
+        })
+        .catch(err => {
+          this.errorAlert(err.data.msg)
+          this.roomNumber = 0
+        })
     },
     logOut() {
       this.logout()

@@ -99,6 +99,18 @@ export default {
             reject(err)
           })
       })
+    },
+    deleteChatUser(_context, payload) {
+      return new Promise((resolve, reject) => {
+        axios
+          .patch(`${process.env.VUE_APP_URL}chat/deletechat/${payload}`)
+          .then(result => {
+            resolve(result)
+          })
+          .catch(err => {
+            reject(err.response)
+          })
+      })
     }
   },
   getters: {

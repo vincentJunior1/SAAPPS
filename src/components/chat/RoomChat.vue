@@ -16,7 +16,7 @@
             alt=""
         /></span>
         <span class="information">
-          <p class="username">{{ profileTo.name }}</p>
+          <p class="username" style="cursor:pointer;">{{ profileTo.name }}</p>
           <p
             class="status"
             v-if="isTyping.typing == 1 && isTyping.username !== user.user_name"
