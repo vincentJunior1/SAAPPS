@@ -1,10 +1,8 @@
 import axios from 'axios'
 import dotenv from 'dotenv'
-import io from 'socket.io-client'
 dotenv.config()
 export default {
   state: {
-    socket: io(`${process.env.VUE_APP_URL}`),
     chatMode: 'chat',
     chats: {},
     chatPerRoom: {},
@@ -31,6 +29,9 @@ export default {
     },
     setTyping(state, payload) {
       state.isTyping = payload
+    },
+    setChats(state) {
+      state.chats = {}
     }
   },
   actions: {
@@ -40,6 +41,7 @@ export default {
           .get(`${process.env.VUE_APP_URL}chat/getallchat/`)
           .then(result => {
             context.commit('setChatList', result.data.data)
+            console.log(result)
             resolve(result)
           })
           .catch(err => {

@@ -1,11 +1,14 @@
 import axios from 'axios'
 import router from '../../router'
+import Chat from './chat'
 import dotenv from 'dotenv'
 dotenv.config()
 export default {
+  modules: { Chat },
   state: {
     user: {},
-    token: localStorage.getItem('token') || null
+    token: localStorage.getItem('token') || null,
+    friendProfile: {}
   },
   mutations: {
     setUser(state, payload) {
@@ -14,7 +17,11 @@ export default {
     },
     delUser(state) {
       state.user = {}
+      Chat.state.chats = {}
       state.token = null
+    },
+    setFriendProfile(state, payload) {
+      state.friendProfile = payload
     }
   },
   actions: {
@@ -107,6 +114,19 @@ export default {
           })
       })
     },
+    showProfileFriend(context, payload) {
+      return new Promise((resolve, reject) => {
+        axios
+          .get(`${process.env.VUE_APP_URL}user/showprofiles/${payload}`)
+          .then(result => {
+            context.commit('setFriendProfile', result.data.data[0])
+            resolve(result)
+          })
+          .catch(err => {
+            reject(err.response)
+          })
+      })
+    },
     logout(context) {
       localStorage.removeItem('token')
       context.commit('delUser')
@@ -152,6 +172,9 @@ export default {
     },
     isLogin(state) {
       return state.token !== null
+    },
+    getFriendProfile(state) {
+      return state.friendProfile
     }
   }
 }

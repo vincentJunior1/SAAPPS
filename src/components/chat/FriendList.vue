@@ -92,10 +92,10 @@
         </span>
         <span class="information">
           <p class="username">{{ item.user_name }}</p>
-          <p class="message">{{ item.chat_content }}</p>
+          <p class="message" v-if="listChat == 1">{{ item.chat_content }}</p>
         </span>
-        <p class="time">19:00</p>
-        <p class="notification">2</p>
+        <p class="time" v-if="listChat == 1">19:00</p>
+        <p class="notification" v-if="listChat == 1">2</p>
       </div>
     </div>
     <b-modal id="bv-modal-example" hide-footer>
@@ -113,9 +113,11 @@
 </template>
 <script>
 import io from 'socket.io-client'
+import dotenv from 'dotenv'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import LongPress from 'vue-directive-long-press'
 import { alert } from '../../mixins/alert'
+dotenv.config()
 export default {
   name: 'FriendList',
   mixins: [alert],
@@ -128,28 +130,31 @@ export default {
       clickSearch: 0,
       userEmail: '',
       friend: {},
-      friends: {},
+      path: process.env.VUE_APP_URL,
       showButtonAdd: 0,
       listFriend: 0,
       listChat: 1,
       showPicture: 0,
-      socket: io('http://localhost:3000'),
-      roomNumber: 0
+      socket: io(process.env.VUE_APP_URL_SOCKETIO),
+      roomNumber: 0,
+      oldRoom: '',
+      soundUrl: '../../assets/short_notification.mp3'
     }
   },
   computed: {
-    ...mapGetters({ chats: 'getChatList' }),
+    ...mapGetters({ friends: 'getChatList' }),
     ...mapGetters({ user: 'setUser' })
   },
   directives: {
     'long-press': LongPress
   },
   created() {
-    this.getChatLists()
-    this.friends = this.chats
-    console.log(this.friends)
+    // this.friends = this.chats
     this.socket.on('chatMessage', data => {
       this.setChat(data)
+      if (data.user_id_from == this.user.user_id) {
+        this.notificationSound()
+      }
     })
     this.socket.on('typingMessage', data => {
       this.setTyping(data)
@@ -166,14 +171,15 @@ export default {
       'makeRoomChats',
       'getRoomChat',
       'logout',
-      'deleteChatUser'
+      'deleteChatUser',
+      'setChats'
     ]),
     closeList() {
       this.showList = 0
       this.searchFriend = 0
     },
     showChat() {
-      this.friends = this.chats
+      // this.friends = this.chats
       this.listChat = 1
       this.listFriend = 0
     },
@@ -246,7 +252,15 @@ export default {
       } else {
         const all = { id, room, image, name }
         this.getRoomChat(all)
-        this.socket.emit('joinRoom', all)
+        if (this.oldRoom == '') {
+          this.socket.emit('joinRoom', all)
+          this.oldRoom = room
+        } else {
+          let newData = { ...all, ...{ oldRoom: this.oldRoom } }
+          console.log(newData)
+          this.socket.emit('changeRoom', newData)
+          this.oldRoom = room
+        }
       }
     },
     onLongPressStart(room) {
@@ -255,8 +269,8 @@ export default {
     deleteChat() {
       this.deleteChatUser(this.roomNumber)
         .then(result => {
-          this.successAlert(result.data.msg)
           this.getChatLists()
+          this.successAlert(result.data.msg)
           this.roomNumber = 0
         })
         .catch(err => {
@@ -264,7 +278,14 @@ export default {
           this.roomNumber = 0
         })
     },
+    notificationSound() {
+      const audio = new Audio(
+        'http://soundbible.com/mp3/Air Plane Ding-SoundBible.com-496729130.mp3'
+      )
+      audio.play()
+    },
     logOut() {
+      this.setChats()
       this.logout()
     }
   }

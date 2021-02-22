@@ -46,11 +46,20 @@
           <p class="username-inf">Username</p>
         </div>
         <div class="user-description" style="position:relative;">
-          <p class="description">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+          <p class="description" v-if="editBio == 0">
+            {{ user.user_bio }}
           </p>
+          <b-form-textarea
+            id="textarea"
+            style="position:relative; margin-top:20px;margin-bottom:20px;overflow-y:hidden;"
+            v-model="user.user_bio"
+            placeholder="Enter something..."
+            rows="3"
+            v-if="editBio == 1"
+            max-rows="6"
+          ></b-form-textarea>
           <p class="bio">Bio</p>
-          <p class="edit-bio">Edit</p>
+          <p class="edit-bio" @click="showBio">Edit</p>
         </div>
         <div class="location">
           <GmapMap
@@ -135,7 +144,8 @@ export default {
       },
       oldPassword: '',
       newPassword: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      editBio: 0
     }
   },
   mixins: [alert],
@@ -239,6 +249,14 @@ export default {
             console.log(err)
             this.errorAlert(err.data.msg)
           })
+      }
+    },
+    showBio() {
+      if (this.editBio == 0) {
+        this.editBio = 1
+      } else {
+        this.editProfiles(this.user)
+        this.editBio = 0
       }
     }
   }
@@ -370,7 +388,7 @@ export default {
 .edit-bio {
   cursor: pointer;
   position: absolute;
-  top: 0px;
+  bottom: 0px;
   right: 10px;
   font-size: 14px;
   color: #7e98df;

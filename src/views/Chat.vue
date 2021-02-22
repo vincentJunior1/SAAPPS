@@ -27,6 +27,7 @@ export default {
     }
   },
   created() {
+    console.log('parent is running')
     this.getChatLists()
     this.chatMode = this.chat
   },

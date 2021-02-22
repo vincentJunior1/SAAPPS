@@ -16,15 +16,68 @@
             alt=""
         /></span>
         <span class="information">
-          <p class="username" style="cursor:pointer;">{{ profileTo.name }}</p>
+          <p
+            class="username"
+            style="cursor:pointer;"
+            @click="
+              getProfiles(profileTo.id)
+              $bvModal.show('profile-info')
+            "
+          >
+            {{ profileTo.name }}
+          </p>
           <p
             class="status"
             v-if="isTyping.typing == 1 && isTyping.username !== user.user_name"
           >
-            Typing
+            Typing...
           </p>
         </span>
       </div>
+      <b-modal id="profile-info" hide-footer>
+        <template #modal-title>{{ profileFriend.user_name }} </template>
+        <div class="d-block text-center">
+          <img
+            class="friends-image"
+            :src="
+              profileFriend.user_image !== '' ||
+              profileFriend.user_image != null
+                ? path + profileFriend.user_image
+                : require('../../assets/image/profile.jpg')
+            "
+            alt=""
+          />
+          <p class="friend-name">{{ profileFriend.user_name }}</p>
+          <p class="friend-email">{{ profileFriend.user_email }}</p>
+          <p class="title-bio" style="font-weight:700; margin-bottom:-10px;">
+            Bio:
+          </p>
+          <p class="friend-bio">{{ profileFriend.user_bio }}</p>
+          <p class="title-bio" style="font-weight:700; margin-bottom:-10px;">
+            Phone:
+          </p>
+          <p class="friend-phone">{{ profileFriend.user_phone }}</p>
+
+          <div class="location">
+            <GmapMap
+              :center="coordinate"
+              :zoom="10"
+              map-type-id="terrain"
+              style="width: auto; height: 300px"
+            >
+              <GmapMarker
+                :position="coordinate"
+                :clickable="true"
+                :draggable="true"
+                icon="https://img.icons8.com/color/48/000000/map-pin.png"
+              />
+            </GmapMap>
+          </div>
+        </div>
+        <b-button class="mt-3" block @click="$bvModal.hide('profile-info')"
+          >Close Me</b-button
+        >
+      </b-modal>
       <div class="body-room">
         <div class="" v-for="(item, index) in listChatRoom" :key="index">
           <span v-if="user.user_id == item.user_id_from"
@@ -91,7 +144,11 @@ export default {
       chat_content: '',
       allChat: [],
       path: process.env.VUE_APP_URL,
-      socket: io('http://localhost:3000')
+      socket: io(process.env.VUE_APP_URL_SOCKETIO),
+      coordinate: {
+        lat: 10,
+        lng: 10
+      }
     }
   },
   watch: {
@@ -115,7 +172,8 @@ export default {
       chat: 'getChat',
       listChatRoom: 'getChatPerRoom',
       profileTo: 'getProfileTo',
-      isTyping: 'getTyping'
+      isTyping: 'getTyping',
+      profileFriend: 'getFriendProfile'
     })
   },
   created() {
@@ -124,7 +182,7 @@ export default {
   },
   methods: {
     ...mapActions(['sendChat']),
-    ...mapActions(['realTimeChat']),
+    ...mapActions(['realTimeChat', 'showProfileFriend']),
     showMenu() {
       if (this.clickMenu == 0) {
         this.showMenuChat = 1
@@ -145,11 +203,58 @@ export default {
       this.sendChat(all)
       this.socket.emit('roomMessage', all)
       this.chat_content = ''
+    },
+    getProfiles(id) {
+      this.showProfileFriend(id)
+      this.$getLocation()
+        .then(() => {
+          if (
+            this.profileFriend.user_lat == '' ||
+            this.profileFriend.user_lat == null
+          ) {
+            this.coordinate
+          } else {
+            this.coordinate = {
+              lat: parseFloat(this.profileFriend.user_lat),
+              lng: parseFloat(this.profileFriend.user_lng)
+            }
+          }
+        })
+        .catch(error => {
+          alert(error)
+        })
     }
   }
 }
 </script>
 <style scoped>
+.friend-name {
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.friend-email {
+  font-size: 18px;
+  /* font-weight: 500; */
+  line-height: 0px;
+  color: #7e98df;
+}
+.friend-bio {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+  line-height: 20px;
+  width: 40%;
+}
+.friend-bio::selection {
+  margin-left: auto;
+  margin-right: auto;
+  font-weight: 600;
+  margin-top: 20px;
+  width: 40%;
+  color: white;
+  background-color: #7e98df;
+}
 .room-chat {
   font-family: rubik;
 }
@@ -270,5 +375,15 @@ export default {
   text-align: left;
   padding-left: 15px;
   padding-top: 10px;
+}
+.friends-image {
+  width: 140px;
+  height: 120px;
+  border: 1px solid black;
+  border-radius: 20px;
+}
+.friend-phone {
+  margin-top: 10px;
+  font-size: 18px;
 }
 </style>
