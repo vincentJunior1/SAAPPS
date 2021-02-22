@@ -7,7 +7,7 @@
     <a href="https://github.com/vincentJunior1/SAAPPS/pulls">Request Feature</a>
   </p>
 
-![Image Banner](https://github.com/vincentJunior1/kopikusukaApp/blob/master/src/assets/SAAPPS.jpg)
+![Image Banner](https://github.com/vincentJunior1/SAAPPS/blob/master/src/assets/SAAPPS.jpg)
 
 ## About The Project
 
