@@ -119,7 +119,11 @@
       ></textarea>
       <span class="emot-1" @click="showMenu()">+</span>
       <img class="emot-2" src="../../assets/image/smile.png" alt="" />
-      <i class="emot-3 fa fa-camera" @click="sendMessages()"></i>
+      <b-button
+        style="height:40px; margin-top:25px; background-color:#7e98df; border:none;"
+        @click="sendMessages()"
+        >Send</b-button
+      >
     </span>
     <div class="menu-chat" v-if="showMenuChat == 1">
       <p class="menuchat">Image</p>
@@ -144,7 +148,7 @@ export default {
       chat_content: '',
       allChat: [],
       path: process.env.VUE_APP_URL,
-      socket: io(process.env.VUE_APP_URL_SOCKETIO),
+      socket: io(process.env.VUE_APP_URL_SOCKETIO, { path: '/api3/socket.io' }),
       coordinate: {
         lat: 10,
         lng: 10
@@ -201,6 +205,7 @@ export default {
         user_image: this.profileTo.image
       }
       this.sendChat(all)
+      console.log(all)
       this.socket.emit('roomMessage', all)
       this.chat_content = ''
     },

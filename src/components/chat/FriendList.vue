@@ -1,5 +1,21 @@
 <template>
   <div class="friend-list">
+    <b-alert
+      :show="dismissCountDown"
+      dismissible
+      variant="success"
+      @dismissed="dismissCountDown = 0"
+      style="position:absolute; left:0px;z-index: 1; top: 0px; "
+      @dismiss-count-down="countDownChanged"
+    >
+      <p>New Message</p>
+      <b-progress
+        variant="warning"
+        :max="dismissSecs"
+        :value="dismissCountDown"
+        height="4px"
+      ></b-progress>
+    </b-alert>
     <div class="navbar" style="position:relative;">
       <span><p class="nav-title" @click="showLists()">SAAPS</p></span>
       <span class="nav-icon" @click="trigerSubMenu()"
@@ -85,7 +101,7 @@
             :src="
               item.user_image == ''
                 ? require('../../assets/image/profile.jpg')
-                : 'http://localhost:3000/' + item.user_image
+                : path + item.user_image
             "
             alt=""
           />
@@ -94,8 +110,6 @@
           <p class="username">{{ item.user_name }}</p>
           <p class="message" v-if="listChat == 1">{{ item.chat_content }}</p>
         </span>
-        <p class="time" v-if="listChat == 1">19:00</p>
-        <p class="notification" v-if="listChat == 1">2</p>
       </div>
     </div>
     <b-modal id="bv-modal-example" hide-footer>
@@ -135,10 +149,14 @@ export default {
       listFriend: 0,
       listChat: 1,
       showPicture: 0,
-      socket: io(process.env.VUE_APP_URL_SOCKETIO),
+      socket: io(process.env.VUE_APP_URL_SOCKETIO, {
+        reconnection: false,
+        path: '/api3/socket.io'
+      }),
       roomNumber: 0,
       oldRoom: '',
-      soundUrl: '../../assets/short_notification.mp3'
+      dismissSecs: 10,
+      dismissCountDown: 0
     }
   },
   computed: {
@@ -151,10 +169,13 @@ export default {
   created() {
     // this.friends = this.chats
     this.socket.on('chatMessage', data => {
-      this.setChat(data)
-      if (data.user_id_from == this.user.user_id) {
-        this.notificationSound()
+      if (data.user_id_to == this.user.user_id) {
+        this.showAlert()
       }
+      this.setChat(data)
+    })
+    this.socket.on('notificationSound', data => {
+      console.log(data)
     })
     this.socket.on('typingMessage', data => {
       this.setTyping(data)
@@ -278,14 +299,11 @@ export default {
           this.roomNumber = 0
         })
     },
-    notificationSound() {
-      const audio = new Audio(
-        'http://soundbible.com/mp3/Air Plane Ding-SoundBible.com-496729130.mp3'
-      )
-      audio.play()
+    showAlert() {
+      this.dismissCountDown = this.dismissSecs
     },
     logOut() {
-      this.setChats()
+      this.$router.push('/')
       this.logout()
     }
   }
@@ -294,10 +312,10 @@ export default {
 <style scoped>
 .friend-list {
   font-family: Rubik;
-  border-right: 1px solid black;
+  border-right: 1px solid rgb(216, 216, 216);
 }
 .navbar {
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid rgb(216, 216, 216);
 }
 .icon-menu {
   cursor: pointer;

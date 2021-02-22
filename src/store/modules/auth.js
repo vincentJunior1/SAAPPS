@@ -4,7 +4,6 @@ import Chat from './chat'
 import dotenv from 'dotenv'
 dotenv.config()
 export default {
-  modules: { Chat },
   state: {
     user: {},
     token: localStorage.getItem('token') || null,

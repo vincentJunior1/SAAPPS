@@ -13,9 +13,9 @@
             class="user-image"
             id="user-image"
             :src="
-              user.user_image == ''
+              user.user_image == '' || user.user_image == null
                 ? require('../../assets/image/profile.jpg')
-                : 'http://localhost:3000/' + user.user_image
+                : path + user.user_image
             "
             alt=""
           />
@@ -133,10 +133,13 @@
 <script>
 import { mapMutations, mapGetters, mapActions } from 'vuex'
 import { alert } from '../../mixins/alert'
+import dotenv from 'dotenv'
+dotenv.config()
 export default {
   name: 'Profile',
   data() {
     return {
+      path: process.env.VUE_APP_URL,
       editPhone: 0,
       coordinate: {
         lat: 10,
@@ -153,7 +156,7 @@ export default {
     console.log(this.user)
     this.$getLocation()
       .then(coordinates => {
-        if (this.user_lat == 10) {
+        if (this.user.user_lat == '' || this.user.user_lat == null) {
           this.coordinate = {
             lat: coordinates.lat,
             lng: coordinates.lng
