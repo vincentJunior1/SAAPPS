@@ -1,6 +1,5 @@
 import axios from 'axios'
 import router from '../../router'
-import Chat from './chat'
 import dotenv from 'dotenv'
 dotenv.config()
 export default {
@@ -16,7 +15,6 @@ export default {
     },
     delUser(state) {
       state.user = {}
-      Chat.state.chats = {}
       state.token = null
     },
     setFriendProfile(state, payload) {

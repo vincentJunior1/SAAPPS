@@ -169,7 +169,7 @@ export default {
   created() {
     // this.friends = this.chats
     this.socket.on('chatMessage', data => {
-      if (data.user_id_to == this.user.user_id) {
+      if (data.user_id_to != this.user.user_id) {
         this.showAlert()
       }
       this.setChat(data)
@@ -272,11 +272,12 @@ export default {
           })
       } else {
         const all = { id, room, image, name }
-        this.getRoomChat(all)
         if (this.oldRoom == '') {
+          this.getRoomChat(all)
           this.socket.emit('joinRoom', all)
           this.oldRoom = room
         } else {
+          this.getRoomChat(all)
           let newData = { ...all, ...{ oldRoom: this.oldRoom } }
           console.log(newData)
           this.socket.emit('changeRoom', newData)

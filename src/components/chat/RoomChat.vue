@@ -80,7 +80,7 @@
       </b-modal>
       <div class="body-room">
         <div class="" v-for="(item, index) in listChatRoom" :key="index">
-          <span v-if="user.user_id == item.user_id_from"
+          <span v-if="item.user_id_to === user.user_id"
             ><img
               class="image-profiles"
               style="margin-bottom:10px;"
@@ -91,9 +91,11 @@
               "
               alt=""
             />
-            <p class="sender">{{ item.chat_content }}</p></span
+            <p class="sender">
+              {{ item.chat_content }}
+            </p></span
           >
-          <span v-else>
+          <span v-if="item.user_id_to == profileTo.id">
             <img
               class="receiver-image"
               style="margin-bottom:10px;"
@@ -183,6 +185,7 @@ export default {
   created() {
     this.chat
     this.allChat = this.listChatRoom
+    console.log(this.profileTo)
   },
   methods: {
     ...mapActions(['sendChat']),
@@ -199,10 +202,10 @@ export default {
     sendMessages() {
       const all = {
         room_chat: this.profileTo.room,
-        user_id_to: this.profileTo.id,
+        user_id_to: this.user.user_id,
         chat_content: this.chat_content,
-        user_id_from: this.user.user_id,
-        user_image: this.profileTo.image
+        user_id_from: this.profileTo.id,
+        user_image: this.user.user_image
       }
       this.sendChat(all)
       console.log(all)
