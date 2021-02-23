@@ -45,7 +45,7 @@
               :src="
                 friend.user_image == ''
                   ? require('../../assets/image/profile.jpg')
-                  : 'http://localhost:3000/' + friend.user_image
+                  : path + friend.user_image
               "
               alt=""
             />
