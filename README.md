@@ -11,7 +11,7 @@
 
 ## About The Project
 
-SAAPS Is Realtime Chatting for who afraid of their privacy, now we provide your chatting apps without sells your pricay.
+SAAPS Is Realtime Chatting for who afraid of their privacy, now we provide your chatting apps without sells your privacy.
 Come Join Us it's free
 
 ## Built With
