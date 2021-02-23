@@ -1,6 +1,6 @@
 <h1 align='center'>Vue JS - SAAPS</h1>
   <p align="center">
-    <a href="">View Demo</a>
+    <a href="https://saapps.netlify.app/">View Demo</a>
     ·
     <a href="https://github.com/vincentJunior1/SAAPPS/issues">Report Bug</a>
     ·
@@ -40,6 +40,7 @@ VUE_APP_URL =http://localhost:3000/
 
 ## Acknowledgements
 
+- [Socket.io](https://socket.io/)
 - [Axios](https://www.npmjs.com/package/axios)
 - [Vuex](https://vuex.vuejs.org/)
 
